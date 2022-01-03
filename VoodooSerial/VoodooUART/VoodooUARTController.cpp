@@ -339,15 +339,15 @@ IOReturn VoodooUARTController::prepareCommunication() {
     UInt32 lcr = 0;
     if (bus.data_bits >= UART_DATABITS_9) {
         LOG("unsupported data bits 9!\n");
-        return kIOReturnError;
+        return kIOReturnUnsupported;
     }
     if (bus.stop_bits == UART_STOPBITS_1_5 && bus.data_bits != UART_DATABITS_5) {
         LOG("unsupported stop bits 1.5 when data bits is not 5!\n");
-        return kIOReturnError;
+        return kIOReturnUnsupported;
     }
     if (bus.stop_bits == UART_STOPBITS_NONE) {
         LOG("unsupported stop bits 0!\n");
-        return kIOReturnError;
+        return kIOReturnUnsupported;
     }
     lcr |= bus.data_bits;
     if (bus.stop_bits == UART_STOPBITS_1_5 || bus.stop_bits == UART_STOPBITS_2)
@@ -358,7 +358,7 @@ IOReturn VoodooUARTController::prepareCommunication() {
             lcr |= UART_LCR_EPAR;
         else if (bus.parity != UART_PARITY_ODD) {
             LOG("unsupported parity type %d!\n", bus.parity);
-            return kIOReturnError;
+            return kIOReturnUnsupported;
         }
     }
     
@@ -383,10 +383,8 @@ IOReturn VoodooUARTController::prepareCommunication() {
         }
         IODelay(100);
     }
-    
     // Enable rx interrupt
     toggleInterruptType(UART_IER_ENABLE_RX_AVAIL_INT | UART_IER_ENABLE_ERR_INT, true);
-    
     ready = true;
     
     return kIOReturnSuccess;
