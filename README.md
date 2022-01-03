@@ -26,7 +26,12 @@ Note that there is sometimes an overlap between device classes. For example, som
 
 ## VoodooUART
 
-TBD
+The following UART devices are supported:
+
+34a88086  Surface Pro 7
+9d278086  Surface Book 2
+
+Interrupt mode is not realised due to the failure of interrupt registration
 
 ## License
 
