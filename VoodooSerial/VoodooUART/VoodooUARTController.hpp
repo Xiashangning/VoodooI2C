@@ -30,12 +30,13 @@
 #include "../utils/helpers.hpp"
 #include "VoodooUARTConstants.h"
 
-#define UART_IDLE_LONG_TIMEOUT  200
+#define UART_LONG_IDLE_TIMEOUT  100
 #define UART_IDLE_TIMEOUT       50
-#define UART_ACTIVE_TIMEOUT     5
+#define UART_ACTIVE_TIMEOUT     2
 
 enum UART_State {
     UART_SLEEP=0,
+    UART_LONG_IDLE,
     UART_IDLE,
     UART_ACTIVE
 };
@@ -48,6 +49,7 @@ enum VoodooUARTState {
 struct VoodooUARTPhysicalDevice {
     UART_State state;
     const char* name;
+    UInt16 device_id;
     IOPCIDevice* device;
     IOMemoryMap* mmap;
 };
@@ -60,7 +62,7 @@ struct VoodooUARTMessage {
 struct VoodooUARTBus {
     UInt32 interrupt_source;
     bool command_error;
-    UInt32 baud_rate;
+    UInt32 baud_rate; /* Unused, always set divisor to 1*/
     UInt8 data_bits;
     UInt8 stop_bits;
     UInt8 parity;
@@ -95,6 +97,8 @@ class EXPORT VoodooUARTController : public IOService {
     bool start(IOService* provider) override;
 
     void stop(IOService* provider) override;
+    
+    void free() override;
     
     IOReturn setPowerState(unsigned long whichState, IOService* whatDevice) override;
     
@@ -141,9 +145,9 @@ class EXPORT VoodooUARTController : public IOService {
 
     inline void writeRegister(UInt32 value, int offset);
     
-    inline void startUARTClock();
+    void startUARTClock();
     
-    inline void stopUARTClock();
+    void stopUARTClock();
 
     void releaseResources();
     
