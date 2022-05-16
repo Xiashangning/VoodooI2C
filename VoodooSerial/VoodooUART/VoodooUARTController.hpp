@@ -30,8 +30,8 @@
 #include "../utils/helpers.hpp"
 #include "VoodooUARTConstants.h"
 
-#define UART_LONG_IDLE_TIMEOUT  100
-#define UART_IDLE_TIMEOUT       50
+#define UART_LONG_IDLE_TIMEOUT  50
+#define UART_IDLE_TIMEOUT       10
 #define UART_ACTIVE_TIMEOUT     2
 
 enum UART_State {

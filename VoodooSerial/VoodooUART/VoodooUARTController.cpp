@@ -287,7 +287,7 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
 
 IOReturn VoodooUARTController::requestConnect(VoodooUARTClient *_client, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity) {
     if (client) {
-        return kIOReturnNotReady;
+        return kIOReturnNoResources;
     }
     client = _client;
     bus.baud_rate = baud_rate;
@@ -500,29 +500,23 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
         LOG("Detected writing LCR while busy! USR: 0x%x", readRegister(DW_UART_USR));
     }
     
+    UInt64 nsecs;
+    SUB_ABSOLUTETIME(&cur_time, &last_activate_time);
+    absolutetime_to_nanoseconds(cur_time, &nsecs);
     if (physical_device.state == UART_ACTIVE) {
-        UInt64 nsecs;
-        SUB_ABSOLUTETIME(&cur_time, &last_activate_time);
-        absolutetime_to_nanoseconds(cur_time, &nsecs);
-        if (nsecs < 100000000) { // < 0.1s
+        if (nsecs < 100000000) // < 0.1s
             interrupt_simulator->setTimeoutMS(UART_ACTIVE_TIMEOUT);
-        } else {
+        else
             physical_device.state=UART_IDLE;
-        }
     }
     if (physical_device.state == UART_IDLE) {
-        UInt64 nsecs;
-        SUB_ABSOLUTETIME(&cur_time, &last_activate_time);
-        absolutetime_to_nanoseconds(cur_time, &nsecs);
-        if (nsecs < 1000000000) { // < 1s
+        if (nsecs < 1000000000) // < 1s
             interrupt_simulator->setTimeoutMS(UART_IDLE_TIMEOUT);
-        } else {
+        else
             physical_device.state=UART_LONG_IDLE;
-        }
     }
-    if (physical_device.state == UART_LONG_IDLE) {
+    if (physical_device.state == UART_LONG_IDLE)
         interrupt_simulator->setTimeoutMS(UART_LONG_IDLE_TIMEOUT);
-    }
 }
 
 IOReturn VoodooUARTController::startInterrupt() {
