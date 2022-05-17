@@ -127,11 +127,6 @@ bool VoodooUARTController::start(IOService* provider) {
     if (!super::start(provider))
         return false;
     
-    lock = IOLockAlloc();
-    if (!lock) {
-        LOG("Could not allocate lock");
-        goto exit;
-    }
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
         LOG("Could not get work loop");
@@ -250,9 +245,6 @@ void VoodooUARTController::releaseResources() {
         OSSafeReleaseNULL(command_gate);
     }
     OSSafeReleaseNULL(work_loop);
-    if (lock) {
-        IOLockFree(lock);
-    }
     OSSafeReleaseNULL(physical_device.device);
 }
 
@@ -260,7 +252,6 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
     if (whatDevice != this)
         return kIOPMAckImplied;
 
-    IOLockLock(lock);
     if (whichState == kIOPMPowerOff) {  // index of kIOPMPowerOff state in VoodooUARTIOPMPowerStates
         if (physical_device.state != UART_SLEEP) {
             physical_device.state = UART_SLEEP;
@@ -281,7 +272,6 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
             LOG("Woke up");
         }
     }
-    IOLockUnlock(lock);
     return kIOPMAckImplied;
 }
 
@@ -306,38 +296,41 @@ void VoodooUARTController::requestDisconnect(VoodooUARTClient *_client) {
 }
 
 IOReturn VoodooUARTController::transmitData(UInt8 *buffer, UInt16 length) {
-    IOLockLock(lock);
-    if (!client || !ready){
-        IOLockUnlock(lock);
-        return kIOReturnError;
+    if (!ready)
+        return kIOReturnNotReady;
+    
+    for (int tries=0; tries < 5; tries++) {
+        IOReturn ret = command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &VoodooUARTController::transmitDataGated), buffer, &length);
+        if (ret == kIOReturnBusy) {
+            LOG("Busy");
+            IOSleep(random()&0x03 + 8);
+        } else
+            return ret;
     }
-    IOReturn ret = command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &VoodooUARTController::transmitDataGated), buffer, &length);
-    IOLockUnlock(lock);
-    return ret;
+    return kIOReturnBusy;
 }
 
 IOReturn VoodooUARTController::transmitDataGated(UInt8* buffer, UInt16* length) {
     AbsoluteTime abstime, deadline;
     IOReturn sleep;
-    nanoseconds_to_absolutetime(500000000, &abstime); // 500ms
+    
+    if (bus.tx_buffer->length)
+        return kIOReturnBusy;
+    
+    nanoseconds_to_absolutetime(50000000, &abstime); // 50ms
     clock_absolutetime_interval_to_deadline(abstime, &deadline);
-    for (int tries=0; tries < 5; tries++) {
-        if (!bus.tx_buffer->length) {
-            bus.tx_buffer->buffer = buffer;
-            bus.tx_buffer->length = *length;
-            toggleInterruptType(UART_IER_ENABLE_TX_EMPTY_INT | UART_IER_ENABLE_THRE_INT_MODE, true);
-            interrupt_simulator->setTimeoutMS(1);
-            sleep = command_gate->commandSleep(&write_complete, deadline, THREAD_INTERRUPTIBLE);
-            
-            if (sleep == THREAD_TIMED_OUT) {
-                LOG("Timeout waiting for transfer request");
-                return kIOReturnTimeout;
-            }
-            return kIOReturnSuccess;
-        }
-        IOSleep(100);
+    
+    bus.tx_buffer->buffer = buffer;
+    bus.tx_buffer->length = *length;
+    toggleInterruptType(UART_IER_ENABLE_TX_EMPTY_INT | UART_IER_ENABLE_THRE_INT_MODE, true);
+    interrupt_simulator->setTimeoutUS(1);
+    sleep = command_gate->commandSleep(&write_complete, deadline, THREAD_INTERRUPTIBLE);
+    
+    if (sleep == THREAD_TIMED_OUT) {
+        LOG("Timeout waiting for transfer request");
+        return kIOReturnTimeout;
     }
-    return kIOReturnOverrun;
+    return kIOReturnSuccess;
 }
 
 IOReturn VoodooUARTController::prepareCommunication() {

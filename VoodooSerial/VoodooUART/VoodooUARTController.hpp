@@ -124,7 +124,6 @@ class EXPORT VoodooUARTController : public IOService {
     VoodooUARTClient* client {nullptr};
     IOWorkLoop* work_loop {nullptr};
     IOCommandGate* command_gate {nullptr};
-    IOLock* lock {nullptr};
     bool is_interrupt_enabled {false};
     IOInterruptEventSource *interrupt_source {nullptr};
     
