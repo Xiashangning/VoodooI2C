@@ -12,8 +12,6 @@
 
 #define CONFIGURED(a) a?"YES":"NO"
 
-OSDefineMetaClassAndAbstractStructors(VoodooUARTClient, IOService);
-
 #define super IOService
 OSDefineMetaClassAndStructors(VoodooUARTController, IOService);
 
@@ -275,11 +273,15 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
     return kIOPMAckImplied;
 }
 
-IOReturn VoodooUARTController::requestConnect(VoodooUARTClient *_client, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity) {
-    if (client) {
+IOReturn VoodooUARTController::requestConnect(OSObject *owner, MessageHandler _handler, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity) {
+    if (target)
         return kIOReturnNoResources;
-    }
-    client = _client;
+    if (owner == nullptr)
+        return kIOReturnError;
+
+    target = owner;
+    handler = _handler;
+    
     bus.baud_rate = baud_rate;
     bus.data_bits = data_bits;
     bus.stop_bits = stop_bits;
@@ -288,11 +290,13 @@ IOReturn VoodooUARTController::requestConnect(VoodooUARTClient *_client, UInt32 
     return prepareCommunication();
 }
 
-void VoodooUARTController::requestDisconnect(VoodooUARTClient *_client) {
-    if (client == _client) {
-        client = nullptr;
+void VoodooUARTController::requestDisconnect(OSObject *owner) {
+    if (target == owner) {
+        target = nullptr;
+        handler = nullptr;
+        
+        stopCommunication();
     }
-    stopCommunication();
 }
 
 IOReturn VoodooUARTController::transmitData(UInt8 *buffer, UInt16 length) {
@@ -482,8 +486,8 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
             *pos++ = readRegister(DW_UART_RX);
             length++;
         } while (readRegister(DW_UART_LSR) & (UART_LSR_DATA_READY|UART_LSR_BREAK_INT) && length < fifo_size);
-        if (client) {
-            client->dataReceived(bus.rx_buffer, length);
+        if (handler) {
+            handler(target, this, bus.rx_buffer, length);
         }
     } else if (status==UART_IIR_RX_LINE_STA_INT) {
         LOG("Receiving data error! LSR: 0x%x", readRegister(DW_UART_LSR));

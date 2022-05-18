@@ -72,13 +72,6 @@ struct VoodooUARTBus {
     UInt8 *rx_buffer;
 };
 
-class EXPORT VoodooUARTClient : public IOService {
-    OSDeclareAbstractStructors(VoodooUARTClient);
-    
-public:
-    virtual void dataReceived(UInt8 *buffer, UInt16 length) = 0;
-};
-
 /* Implements an Intel LPSS Designware 16550A compatible UART Controller
  *
  * This is the base class from which all implementations of a physical
@@ -90,6 +83,8 @@ class EXPORT VoodooUARTController : public IOService {
   OSDeclareDefaultStructors(VoodooUARTController);
 
  public:
+    typedef void (*MessageHandler)(OSObject *owner, VoodooUARTController *sender, UInt8 *buffer, UInt16 length);
+    
     bool init(OSDictionary* properties) override;
     
     IOService* probe(IOService* provider, SInt32* score) override;
@@ -102,16 +97,15 @@ class EXPORT VoodooUARTController : public IOService {
     
     IOReturn setPowerState(unsigned long whichState, IOService* whatDevice) override;
     
-    IOReturn requestConnect(VoodooUARTClient *_client, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity);
+    IOReturn requestConnect(OSObject *owner, MessageHandler _handler, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity);
 
-    void requestDisconnect(VoodooUARTClient *_client);
+    void requestDisconnect(OSObject *owner);
 
     IOReturn transmitData(UInt8 *buffer, UInt16 length);
 
     VoodooUARTPhysicalDevice physical_device;
 
  protected:
-
     IOReturn mapMemory();
 
     IOReturn unmapMemory();
@@ -121,14 +115,14 @@ class EXPORT VoodooUARTController : public IOService {
     void resetDevice();
 
  private:
-    VoodooUARTClient* client {nullptr};
-    IOWorkLoop* work_loop {nullptr};
-    IOCommandGate* command_gate {nullptr};
-    bool is_interrupt_enabled {false};
+    OSObject*               target {nullptr};
+    MessageHandler          handler {nullptr};
+    IOWorkLoop*             work_loop {nullptr};
+    IOCommandGate*          command_gate {nullptr};
     IOInterruptEventSource *interrupt_source {nullptr};
-    
-    IOTimerEventSource* interrupt_simulator {nullptr};
-    AbsoluteTime last_activate_time {0};
+    IOTimerEventSource*     interrupt_simulator {nullptr};
+    AbsoluteTime            last_activate_time {0};
+    bool is_interrupt_enabled {false};
     bool is_polling {false};
     bool ready {false};
     
