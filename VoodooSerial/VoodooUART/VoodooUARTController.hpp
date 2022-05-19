@@ -119,8 +119,10 @@ class EXPORT VoodooUARTController : public IOService {
     MessageHandler          handler {nullptr};
     IOWorkLoop*             work_loop {nullptr};
     IOCommandGate*          command_gate {nullptr};
+    IOCommandGate::Action   transmit_action {nullptr};
     IOInterruptEventSource *interrupt_source {nullptr};
     IOTimerEventSource*     interrupt_simulator {nullptr};
+    IOLock*                 lock {nullptr};
     AbsoluteTime            last_activate_time {0};
     bool is_interrupt_enabled {false};
     bool is_polling {false};

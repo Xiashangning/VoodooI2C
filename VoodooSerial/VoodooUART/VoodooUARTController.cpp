@@ -72,7 +72,7 @@ void VoodooUARTController::resetDevice() {
 
 IOReturn VoodooUARTController::configureDevice() {
     LOG("Set PCI power state D0");
-    auto pci_device = physical_device.device;
+    IOPCIDevice *pci_device = physical_device.device;
     pci_device->enablePCIPowerManagement(kPCIPMCSPowerStateD0);
 
     /* Apply Forcing D0 patch from VoodooI2C*/
@@ -107,13 +107,12 @@ IOService* VoodooUARTController::probe(IOService* provider, SInt32* score) {
 }
 
 void VoodooUARTController::startUARTClock() {
-    if (physical_device.device_id == 0x34a8) {
+    if (physical_device.device_id == 0x34a8)
         writeRegister(UART_UPDATE_CLK | CALC_CLK(8, 15) | UART_ENABLE_CLK, LPSS_PRIV + LPSS_UART_CLK);
-    } else if (physical_device.device_id == 0x9d27) {
+    else if (physical_device.device_id == 0x9d27)
         writeRegister(UART_UPDATE_CLK | CALC_CLK(2, 5) | UART_ENABLE_CLK, LPSS_PRIV + LPSS_UART_CLK);
-    } else {
+    else
         LOG("Unknown UART type");
-    }
 }
 
 void VoodooUARTController::stopUARTClock() {
@@ -125,6 +124,12 @@ bool VoodooUARTController::start(IOService* provider) {
     if (!super::start(provider))
         return false;
     
+    lock = IOLockAlloc();
+    if (!lock) {
+        LOG("Could not allocate UART bus lock");
+        goto exit;
+    }
+    
     work_loop = IOWorkLoop::workLoop();
     if (!work_loop) {
         LOG("Could not get work loop");
@@ -135,6 +140,7 @@ bool VoodooUARTController::start(IOService* provider) {
         LOG("Could not open command gate");
         goto exit;
     }
+    transmit_action = OSMemberFunctionCast(IOCommandGate::Action, this, &VoodooUARTController::transmitDataGated);
     
     if (!physical_device.device->open(this)) {
         LOG("Could not open provider");
@@ -167,13 +173,16 @@ bool VoodooUARTController::start(IOService* provider) {
 //    LOG("    ENCODED_PARMS       : %s", CONFIGURED(reg&UART_CPR_ENCODED_PARMS));
 //    LOG("    DMA_EXTRA           : %s", CONFIGURED(reg&UART_CPR_DMA_EXTRA));
 //    LOG("    FIFO_SIZE           : %d", fifo_size);
+//    if (physical_device.device->registerInterrupt(0, this, OSMemberFunctionCast(IOInterruptAction, this, &VoodooUARTController::handleInterrupt), 0) != kIOReturnSuccess) {
+//        LOG("Too bad that we can only use timer");
     is_polling = true;
     interrupt_simulator = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooUARTController::simulateInterrupt));
     if (!interrupt_simulator) {
-        LOG("No! Even timer event source cannot be created!");
+        LOG("No! Even timer cannot be created!");
         goto exit;
     }
     work_loop->addEventSource(interrupt_simulator);
+//    }
     startInterrupt();
     
     PMinit();
@@ -196,11 +205,10 @@ void VoodooUARTController::stop(IOService *provider) {
 }
 
 void VoodooUARTController::toggleInterruptType(UInt32 type, bool enable) {
-    if (enable) {
+    if (enable)
         ier |= type;
-    } else {
+    else
         ier &= ~type;
-    }
     writeRegister(ier, DW_UART_IER);
 }
 
@@ -223,9 +231,15 @@ inline void VoodooUARTController::writeRegister(UInt32 value, int offset) {
 
 void VoodooUARTController::releaseResources() {
     stopInterrupt();
-    if (interrupt_simulator) {
-        work_loop->removeEventSource(interrupt_simulator);
-        OSSafeReleaseNULL(interrupt_simulator);
+    if (!is_polling) {
+        physical_device.device->unregisterInterrupt(0);
+    } else {
+        if (interrupt_simulator) {
+            interrupt_simulator->cancelTimeout();
+            interrupt_simulator->disable();
+            work_loop->removeEventSource(interrupt_simulator);
+            OSSafeReleaseNULL(interrupt_simulator);
+        }
     }
     if (interrupt_source) {
         work_loop->removeEventSource(interrupt_source);
@@ -243,6 +257,8 @@ void VoodooUARTController::releaseResources() {
         OSSafeReleaseNULL(command_gate);
     }
     OSSafeReleaseNULL(work_loop);
+    if (lock)
+        IOLockFree(lock);
     OSSafeReleaseNULL(physical_device.device);
 }
 
@@ -250,6 +266,8 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
     if (whatDevice != this)
         return kIOPMAckImplied;
 
+    // ensure that we are not in the middle of a data transmission
+    IOLockLock(lock);
     if (whichState == kIOPMPowerOff) {  // index of kIOPMPowerOff state in VoodooUARTIOPMPowerStates
         if (physical_device.state != UART_SLEEP) {
             physical_device.state = UART_SLEEP;
@@ -270,13 +288,14 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
             LOG("Woke up");
         }
     }
+    IOLockUnlock(lock);
     return kIOPMAckImplied;
 }
 
 IOReturn VoodooUARTController::requestConnect(OSObject *owner, MessageHandler _handler, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity) {
     if (target)
         return kIOReturnNoResources;
-    if (owner == nullptr)
+    if (owner == nullptr || _handler == nullptr)
         return kIOReturnError;
 
     target = owner;
@@ -303,15 +322,18 @@ IOReturn VoodooUARTController::transmitData(UInt8 *buffer, UInt16 length) {
     if (!ready)
         return kIOReturnNotReady;
     
+    IOReturn ret = kIOReturnSuccess;
+    IOLockLock(lock);
     for (int tries=0; tries < 5; tries++) {
-        IOReturn ret = command_gate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &VoodooUARTController::transmitDataGated), buffer, &length);
+        ret = command_gate->runAction(transmit_action, buffer, &length);
         if (ret == kIOReturnBusy) {
             LOG("Busy");
             IOSleep(random()&0x03 + 8);
         } else
-            return ret;
+            break;
     }
-    return kIOReturnBusy;
+    IOLockUnlock(lock);
+    return ret;
 }
 
 IOReturn VoodooUARTController::transmitDataGated(UInt8* buffer, UInt16* length) {
@@ -427,7 +449,7 @@ void VoodooUARTController::stopCommunication() {
 }
 
 IOReturn VoodooUARTController::waitUntilNotBusy() {
-    int timeout = TIMEOUT * 150, firstDelay = 100;
+    int timeout = UART_TIMEOUT * 150, firstDelay = 10;
 
     while (readRegister(DW_UART_USR) & UART_USR_BUSY) {
         if (timeout <= 0) {
@@ -449,14 +471,13 @@ void VoodooUARTController::handleInterrupt(OSObject* target, void* refCon, IOSer
 }
 
 void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource* timer) {
+    if (physical_device.state == UART_SLEEP)
+        return;
     if (!ready) {
         interrupt_simulator->setTimeoutMS(UART_LONG_IDLE_TIMEOUT);
         return;
     }
-    if (physical_device.state == UART_SLEEP) {
-        stopInterrupt();
-        return;
-    }
+    
     AbsoluteTime    cur_time;
     clock_get_uptime(&cur_time);
     UInt32 status = readRegister(DW_UART_IIR)&UART_IIR_INT_MASK;
@@ -517,15 +538,14 @@ void VoodooUARTController::simulateInterrupt(OSObject* owner, IOTimerEventSource
 }
 
 IOReturn VoodooUARTController::startInterrupt() {
-    if (is_interrupt_enabled) {
+    if (is_interrupt_enabled)
         return kIOReturnStillOpen;
-    }
+    
     if (is_polling) {
-        interrupt_simulator->setTimeoutMS(UART_IDLE);
         interrupt_simulator->enable();
-    } else {
+        interrupt_simulator->setTimeoutMS(UART_IDLE);
+    } else
         physical_device.device->enableInterrupt(0);
-    }
     is_interrupt_enabled = true;
     return kIOReturnSuccess;
 }
@@ -533,10 +553,10 @@ IOReturn VoodooUARTController::startInterrupt() {
 void VoodooUARTController::stopInterrupt() {
     if (is_interrupt_enabled) {
         if (is_polling) {
+            interrupt_simulator->cancelTimeout();
             interrupt_simulator->disable();
-        } else {
+        } else
             physical_device.device->disableInterrupt(0);
-        }
         is_interrupt_enabled = false;
     }
 }
