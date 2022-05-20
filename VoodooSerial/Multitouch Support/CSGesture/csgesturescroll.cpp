@@ -10,7 +10,7 @@ OSDefineMetaClassAndStructors(CSGestureScroll, IOService);
 
 #ifndef ABS32
 #define ABS32
-inline int32_t abs(int32_t num){
+inline SInt32 abs(SInt32 num){
     if (num < 0){
         return num * -1;
     }

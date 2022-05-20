@@ -42,22 +42,22 @@ struct i2c_info {
     bool device_initiated;
     bool address_mode_10Bit;
     
-    uint32_t bus_speed;
-    uint16_t address;
+    UInt32 bus_speed;
+    UInt16 address;
 };
 
 struct uart_info {
     bool resource_consumer;
     bool device_initiated;
     
-    uint8_t flow_control;
-    uint8_t stop_bits;
-    uint8_t data_bits;
+    UInt8 flow_control;
+    UInt8 stop_bits;
+    UInt8 data_bits;
     bool big_endian;
-    uint32_t baudrate;
-    uint16_t rx_fifo;
-    uint16_t tx_fifo;
-    uint8_t parity;
+    UInt32 baudrate;
+    UInt16 rx_fifo;
+    UInt16 tx_fifo;
+    UInt8 parity;
     
     bool dtd_enabled;
     bool ri_enabled;
@@ -71,24 +71,24 @@ struct gpio_int_info {
     bool resource_consumer;
     bool level_interrupt;
     
-    uint8_t interrupt_polarity;
+    UInt8 interrupt_polarity;
     
     bool shared_interrupt;
     bool wake_interrupt;
     
-    uint8_t pin_config;
-    uint16_t pin_number;
+    UInt8 pin_config;
+    UInt16 pin_number;
     
     int irq_type;
 };
 
 struct gpio_io_info {
     bool resource_consumer;
-    uint8_t io_restriction;
+    UInt8 io_restriction;
     bool sharing;
     
-    uint8_t pin_config;
-    uint16_t pin_number;
+    UInt8 pin_config;
+    UInt16 pin_number;
 };
 
 class VoodooACPIResourcesParser {
@@ -104,10 +104,10 @@ public:
     gpio_io_info gpio_io;
     
     VoodooACPIResourcesParser();
-    uint32_t parseACPIResources(uint8_t const* res, uint32_t offset, uint32_t sz);
+    UInt32 parseACPIResources(UInt8 const* res, UInt32 offset, UInt32 sz);
 private:
-    void parseACPISerialBus(uint8_t const* res, uint32_t offset, uint32_t sz);
-    void parseACPIGPIO(uint8_t const* res, uint32_t offset, uint32_t sz);
+    void parseACPISerialBus(UInt8 const* res, UInt32 offset, UInt32 sz);
+    void parseACPIGPIO(UInt8 const* res, UInt32 offset, UInt32 sz);
 };
 
 #endif /* VoodooACPIResourcesParser_hpp */

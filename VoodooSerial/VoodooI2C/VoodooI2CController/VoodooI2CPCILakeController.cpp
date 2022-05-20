@@ -20,8 +20,8 @@ void VoodooI2CPCILakeController::configurePCI() {
 
     IOLog("%s::%s Current CPU is Comet Lake or Ice Lake, patching...\n",
           getName(), physical_device.name);
-    uint16_t oldPowerStateWord = pci_device->configRead16(0x80 + 0x4);
-    uint16_t newPowerStateWord = (oldPowerStateWord & (~0x3)) | 0x0;
+    UInt16 oldPowerStateWord = pci_device->configRead16(0x80 + 0x4);
+    UInt16 newPowerStateWord = (oldPowerStateWord & (~0x3)) | 0x0;
     pci_device->configWrite16(0x80 + 0x4, newPowerStateWord);
 
     pci_device->setBusMasterEnable(true);

@@ -19,26 +19,26 @@ VoodooACPIResourcesParser::VoodooACPIResourcesParser() {
     found_i2c = false;
 }
 
-void VoodooACPIResourcesParser::parseACPISerialBus(uint8_t const* res, uint32_t offset, uint32_t sz) {
+void VoodooACPIResourcesParser::parseACPISerialBus(UInt8 const* res, UInt32 offset, UInt32 sz) {
     if (found_i2c || found_uart)
         return;
     if (offset >= sz)
         return;
-    uint8_t opcode = res[offset];
+    UInt8 opcode = res[offset];
     if (opcode != 0x8e)
         return;
     
-    uint16_t len;
-    memcpy(&len, res + offset + 1, sizeof(uint16_t));
+    UInt16 len;
+    memcpy(&len, res + offset + 1, sizeof(UInt16));
     
-    uint8_t bustype = res[offset + 5];
-    uint8_t flags = res[offset + 6];
+    UInt8 bustype = res[offset + 5];
+    UInt8 flags = res[offset + 6];
     
-    uint16_t tflags;
-    memcpy(&tflags, res + offset + 7, sizeof(uint16_t));
+    UInt16 tflags;
+    memcpy(&tflags, res + offset + 7, sizeof(UInt16));
     
-    uint16_t datalen;
-    memcpy(&datalen, res + offset + 10, sizeof(uint16_t));
+    UInt16 datalen;
+    memcpy(&datalen, res + offset + 10, sizeof(UInt16));
     
     if (bustype == BUS_TYPE_I2C) {
         found_i2c = true;
@@ -47,12 +47,12 @@ void VoodooACPIResourcesParser::parseACPISerialBus(uint8_t const* res, uint32_t 
         i2c_info.device_initiated = flags & 0x1;
         i2c_info.address_mode_10Bit = tflags & 0x1;
         
-        uint32_t busspeed;
-        memcpy(&busspeed, res + offset + 12, sizeof(uint32_t));
+        UInt32 busspeed;
+        memcpy(&busspeed, res + offset + 12, sizeof(UInt32));
         i2c_info.bus_speed = busspeed;
         
-        uint16_t address;
-        memcpy(&address, res + offset + 16, sizeof(uint16_t));
+        UInt16 address;
+        memcpy(&address, res + offset + 16, sizeof(UInt16));
         i2c_info.address = address;
     } else if (bustype == BUS_TYPE_UART) {
         found_uart = true;
@@ -65,24 +65,24 @@ void VoodooACPIResourcesParser::parseACPISerialBus(uint8_t const* res, uint32_t 
         uart_info.data_bits = tflags>>4 & 0x07;
         uart_info.big_endian = tflags>>7 & 0x01;
         
-        uint32_t baudrate;
-        memcpy(&baudrate, res + offset + 12, sizeof(uint32_t));
+        UInt32 baudrate;
+        memcpy(&baudrate, res + offset + 12, sizeof(UInt32));
         uart_info.baudrate = baudrate;
         
-        uint16_t rx_fifo;
-        memcpy(&rx_fifo, res + offset + 16, sizeof(uint16_t));
+        UInt16 rx_fifo;
+        memcpy(&rx_fifo, res + offset + 16, sizeof(UInt16));
         uart_info.rx_fifo = rx_fifo;
         
-        uint16_t tx_fifo;
-        memcpy(&tx_fifo, res + offset + 18, sizeof(uint16_t));
+        UInt16 tx_fifo;
+        memcpy(&tx_fifo, res + offset + 18, sizeof(UInt16));
         uart_info.tx_fifo = tx_fifo;
         
-        uint8_t parity;
-        memcpy(&parity, res + offset + 20, sizeof(uint8_t));
+        UInt8 parity;
+        memcpy(&parity, res + offset + 20, sizeof(UInt8));
         uart_info.parity = parity;
         
-        uint8_t lines_enabled;
-        memcpy(&lines_enabled, res + offset + 21, sizeof(uint8_t));
+        UInt8 lines_enabled;
+        memcpy(&lines_enabled, res + offset + 21, sizeof(UInt8));
         uart_info.dtd_enabled = lines_enabled>>2 & 0x01;
         uart_info.ri_enabled  = lines_enabled>>3 & 0x01;
         uart_info.dsr_enabled = lines_enabled>>4 & 0x01;
@@ -92,37 +92,37 @@ void VoodooACPIResourcesParser::parseACPISerialBus(uint8_t const* res, uint32_t 
     }
 }
 
-void VoodooACPIResourcesParser::parseACPIGPIO(uint8_t const* res, uint32_t offset, uint32_t sz) {
+void VoodooACPIResourcesParser::parseACPIGPIO(UInt8 const* res, UInt32 offset, UInt32 sz) {
     if (found_gpio_interrupts)
         return;
     if (offset >= sz)
         return;
     
-    uint8_t opcode = res[offset];
+    UInt8 opcode = res[offset];
     if (opcode != 0x8c)
         return;
     
-    uint16_t len;
-    memcpy(&len, res + offset + 1, sizeof(uint16_t));
+    UInt16 len;
+    memcpy(&len, res + offset + 1, sizeof(UInt16));
     
-    uint8_t gpio_type = res[offset + 4];
-    uint8_t flags = res[offset + 5];
+    UInt8 gpio_type = res[offset + 4];
+    UInt8 flags = res[offset + 5];
     
-    uint8_t gpio_flags = res[offset + 7];
+    UInt8 gpio_flags = res[offset + 7];
     
-    uint8_t pin_config = res[offset + 9];
+    UInt8 pin_config = res[offset + 9];
     
-    uint16_t pin_offset;
-    memcpy(&pin_offset, res + offset + 14, sizeof(uint16_t));
+    UInt16 pin_offset;
+    memcpy(&pin_offset, res + offset + 14, sizeof(UInt16));
     
-    uint16_t resourceOffset;
-    memcpy(&resourceOffset, res + offset + 17, sizeof(uint16_t));
+    UInt16 resourceOffset;
+    memcpy(&resourceOffset, res + offset + 17, sizeof(UInt16));
     
-    uint16_t vendorOffset;
-    memcpy(&vendorOffset, res + offset + 19, sizeof(uint16_t));
+    UInt16 vendorOffset;
+    memcpy(&vendorOffset, res + offset + 19, sizeof(UInt16));
     
-    uint16_t pin_number;
-    memcpy(&pin_number, res + offset + pin_offset, sizeof(uint16_t));
+    UInt16 pin_number;
+    memcpy(&pin_number, res + offset + pin_offset, sizeof(UInt16));
     
     if (pin_number == 0xFFFF) // pinNumber 0xFFFF is invalid
         return;
@@ -189,14 +189,14 @@ void VoodooACPIResourcesParser::parseACPIGPIO(uint8_t const* res, uint32_t offse
     }
 }
 
-uint32_t VoodooACPIResourcesParser::parseACPIResources(uint8_t const* res, uint32_t offset, uint32_t sz) {
+UInt32 VoodooACPIResourcesParser::parseACPIResources(UInt8 const* res, UInt32 offset, UInt32 sz) {
     if (offset >= sz)
         return offset;
     
-    uint8_t opcode = res[offset];
+    UInt8 opcode = res[offset];
     
-    uint16_t len;
-    memcpy(&len, res + offset + 1, sizeof(uint16_t));
+    UInt16 len;
+    memcpy(&len, res + offset + 1, sizeof(UInt16));
     
     if (opcode == 0x8c) {
         if (found_gpio_interrupts)

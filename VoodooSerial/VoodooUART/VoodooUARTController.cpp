@@ -295,7 +295,7 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
 IOReturn VoodooUARTController::requestConnect(OSObject *owner, MessageHandler _handler, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity) {
     if (target)
         return kIOReturnNoResources;
-    if (owner == nullptr || _handler == nullptr)
+    if (!owner || !_handler)
         return kIOReturnError;
 
     target = owner;
@@ -405,12 +405,12 @@ IOReturn VoodooUARTController::prepareCommunication() {
     // Request to send
     mcr |= UART_MCR_RTS | UART_MCR_AFC;
     writeRegister(mcr, DW_UART_MCR);
-    for (int tries=0; tries < 5; tries++) {
+    for (int tries=0; tries < 10; tries++) {
         if (readRegister(DW_UART_MSR)&UART_MSR_CTS) {
             LOG("Received Clear To Send Signal!");
             break;
         }
-        IODelay(100);
+        IODelay(10);
     }
     // Enable rx interrupt
     toggleInterruptType(UART_IER_ENABLE_RX_AVAIL_INT | UART_IER_ENABLE_ERR_INT, true);

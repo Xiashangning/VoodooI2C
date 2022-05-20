@@ -81,9 +81,9 @@ IOReturn VoodooI2CDeviceNub::evaluateDSM(const char *uuid, UInt32 index, OSObjec
     uuid_parse(uuid, guid);
 
     // convert to mixed-endian
-    *(reinterpret_cast<uint32_t *>(guid)) = OSSwapInt32(*(reinterpret_cast<uint32_t *>(guid)));
-    *(reinterpret_cast<uint16_t *>(guid) + 2) = OSSwapInt16(*(reinterpret_cast<uint16_t *>(guid) + 2));
-    *(reinterpret_cast<uint16_t *>(guid) + 3) = OSSwapInt16(*(reinterpret_cast<uint16_t *>(guid) + 3));
+    *(reinterpret_cast<UInt32 *>(guid)) = OSSwapInt32(*(reinterpret_cast<UInt32 *>(guid)));
+    *(reinterpret_cast<UInt16 *>(guid) + 2) = OSSwapInt16(*(reinterpret_cast<UInt16 *>(guid) + 2));
+    *(reinterpret_cast<UInt16 *>(guid) + 3) = OSSwapInt16(*(reinterpret_cast<UInt16 *>(guid) + 3));
 
     OSObject *params[] = {
         OSData::withBytes(guid, 16),
@@ -141,7 +141,7 @@ IOReturn VoodooI2CDeviceNub::parseResourcesCRS(VoodooACPIResourcesParser* res_pa
         return kIOReturnNotFound;
     }
 
-    uint8_t const* crs = reinterpret_cast<uint8_t const*>(data->getBytesNoCopy());
+    UInt8 const* crs = reinterpret_cast<UInt8 const*>(data->getBytesNoCopy());
     res_parser->parseACPIResources(crs, 0, data->getLength());
 
     OSSafeReleaseNULL(data);
@@ -161,7 +161,7 @@ IOReturn VoodooI2CDeviceNub::parseResourcesDSM(VoodooACPIResourcesParser* res_pa
         return kIOReturnNotFound;
     }
 
-    uint8_t const* crs = reinterpret_cast<uint8_t const*>(data->getBytesNoCopy());
+    UInt8 const* crs = reinterpret_cast<UInt8 const*>(data->getBytesNoCopy());
     res_parser->parseACPIResources(crs, 0, data->getLength());
 
     OSSafeReleaseNULL(data);

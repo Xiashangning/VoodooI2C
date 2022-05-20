@@ -104,7 +104,7 @@ void VoodooCSGestureHIPointingWrapper::updateRelativeMouse(int dx, int dy, int b
     // 0x2 = right button
     // 0x4 = middle button
     
-    uint64_t now_abs;
+    UInt64 now_abs;
     clock_get_uptime(&now_abs);
     dispatchRelativePointerEvent(dx, dy, buttons, now_abs);
 }
@@ -114,7 +114,7 @@ void VoodooCSGestureHIPointingWrapper::updateAbsoluteMouse(SInt16 x, SInt16 y, i
     // 0x2 = right button
     // 0x4 = middle button
     
-    uint64_t now_abs;
+    UInt64 now_abs;
     clock_get_uptime(&now_abs);
     
     IOGPoint loc;
@@ -133,7 +133,7 @@ void VoodooCSGestureHIPointingWrapper::updateAbsoluteMouse(SInt16 x, SInt16 y, i
 }
 
 void VoodooCSGestureHIPointingWrapper::updateScroll(short dy, short dx, short dz) {
-    uint64_t now_abs;
+    UInt64 now_abs;
     clock_get_uptime(&now_abs);
     if (!horizontalScroll)
         dx = 0;

@@ -29,7 +29,7 @@ OSDefineMetaClassAndStructors(VoodooI2CCSGestureEngine, VoodooI2CMultitouchEngin
 
 #ifndef ABS32
 #define ABS32
-inline int32_t abs(int32_t num){
+inline SInt32 abs(SInt32 num){
     if (num < 0){
         return num * -1;
     }
@@ -389,8 +389,8 @@ bool VoodooI2CCSGestureEngine::ProcessThreeFingerSwipe(csgesture_softc *sc, int 
         if (sc->multitaskinggesturetick > 5 && !sc->multitaskingdone) {
             if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3))) {
                 if (abs(sc->multitaskingy) > 50) {
-                    uint8_t shiftKeys = KBD_LCONTROL_BIT;
-                    uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
+                    UInt8 shiftKeys = KBD_LCONTROL_BIT;
+                    UInt8 keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
                     if (sc->multitaskingy < 0)
                         keyCodes[0] = 0x52;
                     else
@@ -406,8 +406,8 @@ bool VoodooI2CCSGestureEngine::ProcessThreeFingerSwipe(csgesture_softc *sc, int 
             }
             else {
                 if (abs(sc->multitaskingx) > 50) {
-                    uint8_t shiftKeys = KBD_LCONTROL_BIT;
-                    uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
+                    UInt8 shiftKeys = KBD_LCONTROL_BIT;
+                    UInt8 keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
                     if (sc->multitaskingx > 0)
                         keyCodes[0] = 0x50;
                     else
@@ -470,8 +470,8 @@ bool VoodooI2CCSGestureEngine::ProcessFourFingerSwipe(csgesture_softc *sc, int a
         if (sc->multitaskinggesturetick > 30 && !sc->multitaskingdone) {
             if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3) + abs(delta_y4)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3) + abs(delta_x4))) {
                 if (abs(sc->multitaskingy) > 50) {
-                    uint8_t shiftKeys = KBD_LCONTROL_BIT;
-                    uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
+                    UInt8 shiftKeys = KBD_LCONTROL_BIT;
+                    UInt8 keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
                     if (sc->multitaskingy < 0){
                         shiftKeys = KBD_LCONTROL_BIT;
                         keyCodes[0] = 0x44;
@@ -489,8 +489,8 @@ bool VoodooI2CCSGestureEngine::ProcessFourFingerSwipe(csgesture_softc *sc, int a
             }
             else {
                 if (abs(sc->multitaskingx) > 50) {
-                    uint8_t shiftKeys = KBD_LCONTROL_BIT;
-                    uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
+                    UInt8 shiftKeys = KBD_LCONTROL_BIT;
+                    UInt8 keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
                     if (sc->multitaskingx > 0){
                         shiftKeys = 0;
                         keyCodes[0] = 0x44;
@@ -891,8 +891,8 @@ bool VoodooI2CCSGestureEngine::start(IOService *service) {
         _scrollHandler->start(service);
     }
     
-    uint16_t max_x = interface->logical_max_x;
-    uint16_t max_y = interface->logical_max_y;
+    UInt16 max_x = interface->logical_max_x;
+    UInt16 max_y = interface->logical_max_y;
     
     softc.resx = max_x;
     softc.resy = max_y;
@@ -968,7 +968,7 @@ void VoodooI2CCSGestureEngine::update_absolute_mouse(char button, SInt16 x, SInt
         _pointingWrapper->updateAbsoluteMouse(x, y, button);
 }
 
-void VoodooI2CCSGestureEngine::update_keyboard(uint8_t shiftKeys, uint8_t keyCodes[KBD_KEY_CODES]) {
+void VoodooI2CCSGestureEngine::update_keyboard(UInt8 shiftKeys, UInt8 keyCodes[KBD_KEY_CODES]) {
     _CSGESTURE_KEYBOARD_REPORT report;
     report.ReportID = REPORTID_KEYBOARD;
     report.ShiftKeyFlags = shiftKeys;

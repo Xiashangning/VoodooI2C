@@ -122,7 +122,7 @@ bool VoodooI2CNativeEngine::start(IOService* provider) {
 
 bool VoodooI2CNativeEngine::isForceClickEnabled() {
     AbsoluteTime now_abs;
-    uint64_t diff_ns;
+    UInt64 diff_ns;
     clock_get_uptime(&now_abs);
     absolutetime_to_nanoseconds(now_abs - lastForceClickPropertyUpdateTime, &diff_ns);
 
