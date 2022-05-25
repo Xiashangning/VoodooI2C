@@ -18,12 +18,10 @@
 #define VoodooUARTController_hpp
 
 #include <IOKit/IOLib.h>
-#include <IOKit/IOLocks.h>
 #include <IOKit/IOWorkLoop.h>
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOTimerEventSource.h>
 #include <IOKit/IOInterruptEventSource.h>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <IOKit/pci/IOPCIDevice.h>
 
 #include "../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
@@ -60,15 +58,13 @@ struct VoodooUARTMessage {
 };
 
 struct VoodooUARTBus {
-    UInt32 interrupt_source;
     bool command_error;
     UInt32 baud_rate; /* Unused, always set divisor to 1*/
     UInt8 data_bits;
     UInt8 stop_bits;
     UInt8 parity;
-    UInt32 tx_buffer_length;
-    VoodooUARTMessage* tx_buffer;
-    UInt32 tx_fifo_depth;
+    bool flow_control;
+    VoodooUARTMessage *tx_buffer;
     UInt8 *rx_buffer;
 };
 
@@ -97,7 +93,7 @@ class EXPORT VoodooUARTController : public IOService {
     
     IOReturn setPowerState(unsigned long whichState, IOService* whatDevice) override;
     
-    IOReturn requestConnect(OSObject *owner, MessageHandler _handler, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity);
+    IOReturn requestConnect(OSObject *owner, MessageHandler _handler, UInt32 baud_rate, UInt8 data_bits, UInt8 stop_bits, UInt8 parity, bool flow_control);
 
     void requestDisconnect(OSObject *owner);
 
@@ -110,9 +106,9 @@ class EXPORT VoodooUARTController : public IOService {
 
     IOReturn unmapMemory();
     
-    IOReturn configureDevice();
+    IOReturn initDevice();
     
-    void resetDevice();
+    void configDevice();
 
  private:
     OSObject*               target {nullptr};
@@ -122,7 +118,6 @@ class EXPORT VoodooUARTController : public IOService {
     IOCommandGate::Action   transmit_action {nullptr};
     IOInterruptEventSource *interrupt_source {nullptr};
     IOTimerEventSource*     interrupt_simulator {nullptr};
-    IOLock*                 lock {nullptr};
     AbsoluteTime            last_activate_time {0};
     bool is_interrupt_enabled {false};
     bool is_polling {false};
@@ -146,6 +141,8 @@ class EXPORT VoodooUARTController : public IOService {
 
     void releaseResources();
     
+    IOReturn setPowerStateGated(unsigned long *whichState);
+    
     IOReturn transmitDataGated(UInt8* buffer, UInt16* length);
     
     /* Set permitted Interrupt type by IER*/
@@ -155,9 +152,11 @@ class EXPORT VoodooUARTController : public IOService {
     
     IOReturn waitUntilNotBusy();
     
-    void handleInterrupt(OSObject* target, void* refCon, IOService* nubDevice, int source);
+    void transmitAndReceiveData();
     
-    void simulateInterrupt(OSObject* owner, IOTimerEventSource* timer);
+    void handleInterrupt(IOInterruptEventSource *sender, int count);
+    
+    void simulateInterrupt(IOTimerEventSource* timer);
 
     IOReturn startInterrupt();
 

@@ -83,7 +83,7 @@ class EXPORT VoodooI2CControllerDriver : public IOService {
 
     /* Handles an interrupt that has been asserted by the controller */
 
-    void handleInterrupt(OSObject* target, void* refCon, IOService* nubDevice, int source);
+    void handleInterrupt(void* refCon, IOService* nubDevice, int source);
 
     /* Initialises <VoodooI2CControllerDriver> class
      * @properties OSDictionary* representing the matched personality

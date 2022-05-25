@@ -139,6 +139,6 @@
 #define UART_USR_RX_FIFO_NOT_EMPTY  BIT(3)
 #define UART_USR_RX_FIFO_FULL       BIT(4)
 
-#define UART_TIMEOUT 20
+#define UART_TIMEOUT 300
 
 #endif /* VoodooUARTConstants_h */

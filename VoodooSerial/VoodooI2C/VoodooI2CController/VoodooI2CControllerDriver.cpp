@@ -93,7 +93,7 @@ void VoodooI2CControllerDriver::handleAbortI2C() {
     IOLog("%s::%s I2C Transaction error: 0x%08x - aborting\n", getName(), bus_device.name, bus_device.abort_source);
 }
 
-void VoodooI2CControllerDriver::handleInterrupt(OSObject* target, void* refCon, IOService* nubDevice, int source) {
+void VoodooI2CControllerDriver::handleInterrupt(void* refCon, IOService* nubDevice, int source) {
     /* Direct interrupt context. Do NOT block the thread by memory allocation, IOLog, IOLockLock, command_gate->runAction, ... */
     nub->disableInterrupt(0);
 

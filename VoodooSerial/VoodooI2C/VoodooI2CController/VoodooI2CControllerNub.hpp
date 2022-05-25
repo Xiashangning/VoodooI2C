@@ -116,17 +116,6 @@ class EXPORT VoodooI2CControllerNub : public IOService {
     IOReturn unregisterInterrupt(int source) override;
 
  private:
-    /* Handles an interrupt when the controller asserts its interrupt line
-     * @owner    The owner of this interrupt
-     * @src      The interrupt event source
-     * @intCount   The index of the interrupt in the provider
-     *
-     * This function is called by the operating system when the controller asserts its interrupt line. 
-     * It's only purpose is to delegate the interrupt to the attached driver.
-     */
-
-    void interruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount);
-
     /* Releases resources allocated in <start>
      *
      * This function is called during a graceful exit from <start> and during

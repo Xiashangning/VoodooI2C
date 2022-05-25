@@ -129,7 +129,6 @@ void VoodooACPIResourcesParser::parseACPIGPIO(UInt8 const* res, UInt32 offset, U
     
     if (gpio_type == 0) {
         // GPIOInt
-        
         found_gpio_interrupts = true;
         
         gpio_interrupts.resource_consumer = flags & 0x1;
@@ -173,11 +172,8 @@ void VoodooACPIResourcesParser::parseACPIGPIO(UInt8 const* res, UInt32 offset, U
             }
         }
         gpio_interrupts.irq_type = irq;
-    }
-    
-    if (gpio_type == 1) {
+    } else if (gpio_type == 1) {
         // GPIOIo
-        
         found_gpio_io = true;
         
         gpio_io.resource_consumer = flags & 0x1;
@@ -202,7 +198,7 @@ UInt32 VoodooACPIResourcesParser::parseACPIResources(UInt8 const* res, UInt32 of
         if (found_gpio_interrupts)
             return offset;
         parseACPIGPIO(res, offset, sz);
-    }else if (opcode == 0x8e) {
+    } else if (opcode == 0x8e) {
         if (found_i2c || found_uart)
             return offset;
         parseACPISerialBus(res, offset, sz);

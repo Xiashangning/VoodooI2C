@@ -23,8 +23,9 @@
 
 #define LPSS_PRIV                   0x200
 #define LPSS_PRIV_RESETS            0x04
-#define LPSS_PRIV_RESETS_FUNC       BIT(2)
-#define LPSS_PRIV_RESETS_IDMA       0x3
+#define LPSS_PRIV_RESETS_FUNC       0x3
+#define LPSS_PRIV_RESETS_IDMA       BIT(2)
+#define LPSS_PRIV_REMAP_ADDR        0x40
 #define LPSS_PRIVATE_CLOCK_GATING   0x800
 
 UInt16 abs(SInt16 x);

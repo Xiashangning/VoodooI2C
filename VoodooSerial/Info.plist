@@ -458,7 +458,7 @@
 			<key>IOProbeScore</key>
 			<integer>9999</integer>
 			<key>IOProviderClass</key>
-			<string>IOPCIDevice</string>
+			<string>#IOPCIDevice</string>
 		</dict>
 		<key>VoodooI2CPCILakeController</key>
 		<dict>
@@ -471,7 +471,7 @@
 			<key>IOProbeScore</key>
 			<integer>9999</integer>
 			<key>IOProviderClass</key>
-			<string>IOPCIDevice</string>
+			<string>#IOPCIDevice</string>
 		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
