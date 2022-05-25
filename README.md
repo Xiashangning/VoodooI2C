@@ -1,4 +1,6 @@
-## VoodooI2C
+## VoodooI2C part
+
+**Currently VoodooI2C is disabled due to none of I2C devices on Surface series is usable** (Ambient Light Sensor can be enabled but it readings are not properly configured)
 
 VoodooI2C is a project consisting of macOS kernel extensions that add support for I2C bus devices.
 This kext is intended to be installed by anyone whose computer requires some form of I2C support. It consists of I2C controller drivers and is responsible for publishing device nubs to the IOService plane.
@@ -28,8 +30,9 @@ Note that there is sometimes an overlap between device classes. For example, som
 
 The following UART devices are supported:
 
-34a88086  Surface Pro 7
-9d278086  Surface Book 2
+`34a88086`  clk_rate 64000000 baud_rate 4000000 -> divisor 1, clk_config M=8 N=15
+
+`9d278086`  clk_rate 48000000 baud_rate 3000000 -> divisor 1, clk_config M=2 N=5 (in this config it is usable but produces a lot of transmission errors, further investigations are needed)
 
 Interrupt mode is not realised due to the failure of interrupt registration
 
