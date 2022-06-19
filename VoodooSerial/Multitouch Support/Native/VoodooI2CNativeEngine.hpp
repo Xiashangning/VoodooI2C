@@ -17,8 +17,8 @@
 #include "../VoodooI2CMultitouchEngine.hpp"
 
 
-#include "VoodooInputMultitouch/VoodooInputTransducer.h"
-#include "VoodooInputMultitouch/VoodooInputMessages.h"
+#include "../../../../VoodooInput/VoodooInput/VoodooInputMultitouch/VoodooInputTransducer.h"
+#include "../../../../VoodooInput/VoodooInput/VoodooInputMultitouch/VoodooInputMessages.h"
 
 class EXPORT VoodooI2CNativeEngine : public VoodooI2CMultitouchEngine {
     OSDeclareDefaultStructors(VoodooI2CNativeEngine);
