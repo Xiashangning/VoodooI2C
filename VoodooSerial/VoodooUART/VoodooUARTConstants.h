@@ -19,20 +19,20 @@
 #define CALC_CLK(M, N)      (((N)&0x7F)<<16|((M)&0x7F)<<1)
 
 /* Surface Pro 7 UART type 16550A specific register layout. See https://linux-sunxi.org/images/d/d2/Dw_apb_uart_db.pdf*/
-#define DW_UART_RX  0x0                     /*receive buffer */
-#define DW_UART_TX  0x0                     /*transmit buffer */
+#define DW_UART_RX  0x0                     /* Receive buffer */
+#define DW_UART_TX  0x0                     /* Transmit buffer */
 #define DW_UART_DLL 0x0
 
 #define DW_UART_DLH (0x01<<REG_SHIFT)
-#define DW_UART_IER (0x01<<REG_SHIFT)       /*Interrupt Enable Register*/
+#define DW_UART_IER (0x01<<REG_SHIFT)       /* Interrupt Enable Register*/
 
-#define DW_UART_IIR (0x02<<REG_SHIFT)       /*Interrupt Identification Register READ!*/
-#define DW_UART_FCR (0x02<<REG_SHIFT)       /*FIFO Control Register WRITE!*/
+#define DW_UART_IIR (0x02<<REG_SHIFT)       /* Interrupt Identification Register READ!*/
+#define DW_UART_FCR (0x02<<REG_SHIFT)       /* FIFO Control Register WRITE!*/
 
-#define DW_UART_LCR (0x03<<REG_SHIFT)       /*Line Control Register */
-#define DW_UART_MCR (0x04<<REG_SHIFT)       /*Modem Control Register */
-#define DW_UART_LSR (0x05<<REG_SHIFT)       /*Line Status Register */
-#define DW_UART_MSR (0x06<<REG_SHIFT)       /*Modem Status Register */
+#define DW_UART_LCR (0x03<<REG_SHIFT)       /* Line Control Register */
+#define DW_UART_MCR (0x04<<REG_SHIFT)       /* Modem Control Register */
+#define DW_UART_LSR (0x05<<REG_SHIFT)       /* Line Status Register */
+#define DW_UART_MSR (0x06<<REG_SHIFT)       /* Modem Status Register */
 
 #define DW_UART_USR    (0x1F<<REG_SHIFT)    /* UART Status Register */
 #define DW_UART_SRR    (0x22<<REG_SHIFT)    /* Software Reset Register */
@@ -40,16 +40,16 @@
 #define DW_UART_UCV    (0x3E<<REG_SHIFT)    /* UART Component Version */
 
 /* Line Control Register bits*/
-#define UART_LCR_DLAB        0x80 /* Divisor latch access bit */
+#define UART_LCR_DLAB       0x80 /* Divisor latch access bit */
 #define UART_LCR_SBC        0x40 /* Set break control */
-#define UART_LCR_SPAR        0x20 /* Stick parity (?) */
-#define UART_LCR_EPAR        0x10 /* Even parity select */
-#define UART_LCR_PARITY        0x08 /* Parity Enable */
-#define UART_LCR_STOP        0x04 /* Stop bits: 0=1 bit, 1=2 bits */
-#define UART_LCR_WLEN5        0x00 /* Wordlength: 5 bits */
-#define UART_LCR_WLEN6        0x01 /* Wordlength: 6 bits */
-#define UART_LCR_WLEN7        0x02 /* Wordlength: 7 bits */
-#define UART_LCR_WLEN8        0x03 /* Wordlength: 8 bits */
+#define UART_LCR_SPAR       0x20 /* Stick parity (?) */
+#define UART_LCR_EPAR       0x10 /* Even parity select */
+#define UART_LCR_PARITY     0x08 /* Parity Enable */
+#define UART_LCR_STOP       0x04 /* Stop bits: 0=1 bit, 1=2 bits */
+#define UART_LCR_WLEN5      0x00 /* Wordlength: 5 bits */
+#define UART_LCR_WLEN6      0x01 /* Wordlength: 6 bits */
+#define UART_LCR_WLEN7      0x02 /* Wordlength: 7 bits */
+#define UART_LCR_WLEN8      0x03 /* Wordlength: 8 bits */
 
 /* Interrupt Enable Register bits */
 #define UART_IER_ENABLE_THRE_INT_MODE   BIT(7)

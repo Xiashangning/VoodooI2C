@@ -32,6 +32,8 @@
 #define UART_IDLE_TIMEOUT       10
 #define UART_ACTIVE_TIMEOUT     2
 
+//TODO: clock gating & device idle
+
 enum UART_State {
     UART_SLEEP=0,
     UART_LONG_IDLE,
@@ -39,22 +41,12 @@ enum UART_State {
     UART_ACTIVE
 };
 
-enum VoodooUARTState {
-    kVoodooUARTStateOff = 0,
-    kVoodooUARTStateOn = 1
-};
-
 struct VoodooUARTPhysicalDevice {
     UART_State state;
     const char* name;
     UInt16 device_id;
-    IOPCIDevice* device;
+    IOPCIDevice* pci_device;
     IOMemoryMap* mmap;
-};
-
-struct VoodooUARTMessage {
-    UInt8* buffer;
-    UInt16 length;
 };
 
 struct VoodooUARTBus {
@@ -64,7 +56,8 @@ struct VoodooUARTBus {
     UInt8 stop_bits;
     UInt8 parity;
     bool flow_control;
-    VoodooUARTMessage *tx_buffer;
+    UInt8 *tx_buffer;
+    UInt16 tx_buffer_len;
     UInt8 *rx_buffer;
 };
 
@@ -99,9 +92,9 @@ class EXPORT VoodooUARTController : public IOService {
 
     IOReturn transmitData(UInt8 *buffer, UInt16 length);
 
-    VoodooUARTPhysicalDevice physical_device;
-
  protected:
+    VoodooUARTPhysicalDevice device;
+    
     IOReturn mapMemory();
 
     IOReturn unmapMemory();
@@ -158,7 +151,7 @@ class EXPORT VoodooUARTController : public IOService {
     
     void simulateInterrupt(IOTimerEventSource* timer);
 
-    IOReturn startInterrupt();
+    void startInterrupt();
 
     void stopInterrupt();
     
