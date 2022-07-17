@@ -188,7 +188,7 @@ bool VoodooUARTController::start(IOService* provider) {
     
     PMinit();
     device.pci_device->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
     
     device.pci_device->retain();
     registerService();

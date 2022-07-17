@@ -469,7 +469,7 @@ bool VoodooI2CControllerDriver::start(IOService* provider) {
 
     PMinit();
     nub->joinPMtree(this);
-    registerPowerDriver(this, MyIOPMPowerStates, kIOPMNumberPowerStates);
+    registerPowerDriver(this, myIOPMPowerStates, kIOPMNumberPowerStates);
 
     if (getBusConfig() != kIOReturnSuccess) {
         IOLog("%s::%s Warning: Error getting bus config, using defaults where necessary\n", getName(), bus_device.name);

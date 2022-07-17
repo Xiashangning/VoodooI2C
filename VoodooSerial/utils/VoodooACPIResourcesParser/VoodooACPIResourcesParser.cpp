@@ -22,14 +22,6 @@ VoodooACPIResourcesParser::VoodooACPIResourcesParser() {
 void VoodooACPIResourcesParser::parseACPISerialBus(UInt8 const* res, UInt32 offset, UInt32 sz) {
     if (found_i2c || found_uart)
         return;
-    if (offset >= sz)
-        return;
-    UInt8 opcode = res[offset];
-    if (opcode != 0x8e)
-        return;
-    
-    UInt16 len;
-    memcpy(&len, res + offset + 1, sizeof(UInt16));
     
     UInt8 bustype = res[offset + 5];
     UInt8 flags = res[offset + 6];
@@ -95,15 +87,6 @@ void VoodooACPIResourcesParser::parseACPISerialBus(UInt8 const* res, UInt32 offs
 void VoodooACPIResourcesParser::parseACPIGPIO(UInt8 const* res, UInt32 offset, UInt32 sz) {
     if (found_gpio_interrupts)
         return;
-    if (offset >= sz)
-        return;
-    
-    UInt8 opcode = res[offset];
-    if (opcode != 0x8c)
-        return;
-    
-    UInt16 len;
-    memcpy(&len, res + offset + 1, sizeof(UInt16));
     
     UInt8 gpio_type = res[offset + 4];
     UInt8 flags = res[offset + 5];
@@ -204,6 +187,6 @@ UInt32 VoodooACPIResourcesParser::parseACPIResources(UInt8 const* res, UInt32 of
         parseACPISerialBus(res, offset, sz);
     }
     
-    offset += (len + 3);
+    offset += len + 3;
     return parseACPIResources(res, offset, sz);
 }

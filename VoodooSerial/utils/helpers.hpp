@@ -44,7 +44,7 @@ enum VoodooI2CState {
     kVoodooI2CStateOn = 1
 };
 
-static IOPMPowerState MyIOPMPowerStates[kIOPMNumberPowerStates] = {
+static IOPMPowerState myIOPMPowerStates[kIOPMNumberPowerStates] = {
     {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
     {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
 };
