@@ -32,8 +32,6 @@
 #define UART_IDLE_TIMEOUT       10
 #define UART_ACTIVE_TIMEOUT     2
 
-//TODO: clock gating & device idle
-
 enum UART_State {
     UART_SLEEP=0,
     UART_LONG_IDLE,

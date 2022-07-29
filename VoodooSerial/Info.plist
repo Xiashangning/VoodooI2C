@@ -20,19 +20,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>VoodooUARTController</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>VoodooUARTController</string>
-			<key>IOPCIMatch</key>
-			<string>0x34a88086 0x9d278086</string>
-			<key>IOProbeScore</key>
-			<integer>400</integer>
-			<key>IOProviderClass</key>
-			<string>IOPCIDevice</string>
-		</dict>
 		<key>VoodooI2CControllerDriver</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -67,6 +54,19 @@
 			<string>0x06e88086&amp;0xFFFCFFFF 0x02e88086&amp;0xFFFCFFFF 0x34e88086&amp;0xFFFCFFFF 0x34c58086&amp;0xFFFCFFFF</string>
 			<key>IOProbeScore</key>
 			<integer>9999</integer>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+		</dict>
+		<key>VoodooUARTController</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>VoodooUARTController</string>
+			<key>IOPCIMatch</key>
+			<string>0x34a88086 0x9d278086</string>
+			<key>IOProbeScore</key>
+			<integer>400</integer>
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 		</dict>
