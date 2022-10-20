@@ -183,8 +183,10 @@ bool VoodooUARTController::start(IOService* provider) {
             return kIOReturnError;
         }
         work_loop->addEventSource(interrupt_simulator);
-    } else
+    } else {
         work_loop->addEventSource(interrupt_source);
+        interrupt_source->enable();
+    }
     
     PMinit();
     device.pci_device->joinPMtree(this);
@@ -503,10 +505,10 @@ void VoodooUARTController::transmitAndReceiveData() {
         do {
             *pos++ = readRegister(DW_UART_RX);
         } while (++length < fifo_size && readRegister(DW_UART_LSR) & (UART_LSR_DATA_READY|UART_LSR_BREAK_INT));
-        if (handler) {
+        if (handler)
             handler(target, this, bus.rx_buffer, length);
-        }
-    } else if (status==UART_IIR_RX_LINE_STA_INT) {
+    }
+    if (status==UART_IIR_RX_LINE_STA_INT) {
         LOG("Receiving data error! LSR: 0x%x", readRegister(DW_UART_LSR));
     } else if (status==UART_IIR_MODEM_STA_INT) {
         LOG("Modem status changed! MSR: 0x%x", readRegister(DW_UART_MSR));

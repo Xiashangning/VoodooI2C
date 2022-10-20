@@ -30,7 +30,7 @@
 
 #define UART_LONG_IDLE_TIMEOUT  50
 #define UART_IDLE_TIMEOUT       10
-#define UART_ACTIVE_TIMEOUT     2
+#define UART_ACTIVE_TIMEOUT     1
 
 enum UART_State {
     UART_SLEEP=0,
