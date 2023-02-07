@@ -11,9 +11,9 @@
 
 #include <Availability.h>
 
-#ifndef __ACIDANTHERA_MAC_SDK
-#error "This kext SDK is unsupported. Download from https://github.com/acidanthera/MacKernelSDK"
-#endif
+//#ifndef __ACIDANTHERA_MAC_SDK
+//#error "This kext SDK is unsupported. Download from https://github.com/acidanthera/MacKernelSDK"
+//#endif
 
 #define super IOService
 OSDefineMetaClassAndStructors(VoodooI2CDeviceNub, IOService);
