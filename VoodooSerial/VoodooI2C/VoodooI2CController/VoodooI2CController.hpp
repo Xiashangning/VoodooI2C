@@ -8,12 +8,10 @@
 #ifndef VoodooI2CController_hpp
 #define VoodooI2CController_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOKitKeys.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <IOKit/pci/IOPCIDevice.h>
 
-#include "../../utils/helpers.hpp"
+#include "../../helpers.hpp"
 
 #ifndef kACPIDevicePathKey
 #define kACPIDevicePathKey "acpi-path"

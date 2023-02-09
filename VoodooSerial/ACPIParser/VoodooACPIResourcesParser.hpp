@@ -106,8 +106,8 @@ public:
     VoodooACPIResourcesParser();
     UInt32 parseACPIResources(UInt8 const* res, UInt32 offset, UInt32 sz);
 private:
-    void parseACPISerialBus(UInt8 const* res, UInt32 offset, UInt32 sz);
-    void parseACPIGPIO(UInt8 const* res, UInt32 offset, UInt32 sz);
+    void parseACPISerialBus(UInt8 const* res, UInt32 offset);
+    void parseACPIGPIO(UInt8 const* res, UInt32 offset);
 };
 
 #endif /* VoodooACPIResourcesParser_hpp */

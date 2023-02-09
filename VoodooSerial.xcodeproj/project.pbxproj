@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		25C8D7DB27358CDD00F58956 /* helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25C8D78927355F1B00F58956 /* helpers.cpp */; };
 		25C8D7DC27358CE000F58956 /* helpers.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D78A27355F1B00F58956 /* helpers.hpp */; };
 		25C8D7DD27358D0500F58956 /* linuxirq.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 25C8D78D27355F1B00F58956 /* linuxirq.hpp */; };
 		25C8D7DE27358D0700F58956 /* VoodooACPIResourcesParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25C8D78E27355F1B00F58956 /* VoodooACPIResourcesParser.cpp */; };
@@ -44,7 +43,6 @@
 /* Begin PBXFileReference section */
 		25B97DA5260B950E00657C76 /* VoodooSerial.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoodooSerial.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		25B97E43260BA33B00657C76 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		25C8D78927355F1B00F58956 /* helpers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = helpers.cpp; sourceTree = "<group>"; };
 		25C8D78A27355F1B00F58956 /* helpers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = helpers.hpp; sourceTree = "<group>"; };
 		25C8D78C27355F1B00F58956 /* VoodooACPIResourcesParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VoodooACPIResourcesParser.hpp; sourceTree = "<group>"; };
 		25C8D78D27355F1B00F58956 /* linuxirq.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = linuxirq.hpp; sourceTree = "<group>"; };
@@ -84,7 +82,8 @@
 		25B97D6E260B943E00657C76 /* VoodooSerial */ = {
 			isa = PBXGroup;
 			children = (
-				25C8D78827355F1B00F58956 /* utils */,
+				25C8D78A27355F1B00F58956 /* helpers.hpp */,
+				25C8D78827355F1B00F58956 /* ACPIParser */,
 				AC2603B21F2F294000CF238F /* VoodooI2C */,
 				25C8D7E027359C6C00F58956 /* VoodooUART */,
 				25B97E43260BA33B00657C76 /* Info.plist */,
@@ -92,31 +91,21 @@
 			path = VoodooSerial;
 			sourceTree = "<group>";
 		};
-		25C8D78827355F1B00F58956 /* utils */ = {
+		25C8D78827355F1B00F58956 /* ACPIParser */ = {
 			isa = PBXGroup;
 			children = (
-				25C8D78B27355F1B00F58956 /* VoodooACPIResourcesParser */,
-				25C8D78927355F1B00F58956 /* helpers.cpp */,
-				25C8D78A27355F1B00F58956 /* helpers.hpp */,
-			);
-			path = utils;
-			sourceTree = "<group>";
-		};
-		25C8D78B27355F1B00F58956 /* VoodooACPIResourcesParser */ = {
-			isa = PBXGroup;
-			children = (
-				25C8D78C27355F1B00F58956 /* VoodooACPIResourcesParser.hpp */,
 				25C8D78E27355F1B00F58956 /* VoodooACPIResourcesParser.cpp */,
+				25C8D78C27355F1B00F58956 /* VoodooACPIResourcesParser.hpp */,
 				25C8D78D27355F1B00F58956 /* linuxirq.hpp */,
 			);
-			path = VoodooACPIResourcesParser;
+			path = ACPIParser;
 			sourceTree = "<group>";
 		};
 		25C8D7E027359C6C00F58956 /* VoodooUART */ = {
 			isa = PBXGroup;
 			children = (
-				25C8D7E227359C6C00F58956 /* VoodooUARTController.hpp */,
 				25C8D7E327359C6C00F58956 /* VoodooUARTController.cpp */,
+				25C8D7E227359C6C00F58956 /* VoodooUARTController.hpp */,
 				25C8D7E127359C6C00F58956 /* VoodooUARTConstants.h */,
 			);
 			path = VoodooUART;
@@ -306,7 +295,6 @@
 				25DFC0372877F0DE00EA6990 /* VoodooI2CController.cpp in Sources */,
 				25C8D7E627359C6C00F58956 /* VoodooUARTController.cpp in Sources */,
 				25DFC0362877F0DE00EA6990 /* VoodooI2CPCILakeController.cpp in Sources */,
-				25C8D7DB27358CDD00F58956 /* helpers.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +336,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Debug;
@@ -383,6 +372,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.xavier.VoodooSerial;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Release;

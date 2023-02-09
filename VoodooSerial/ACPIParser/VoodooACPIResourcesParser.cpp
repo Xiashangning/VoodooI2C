@@ -19,7 +19,7 @@ VoodooACPIResourcesParser::VoodooACPIResourcesParser() {
     found_i2c = false;
 }
 
-void VoodooACPIResourcesParser::parseACPISerialBus(UInt8 const* res, UInt32 offset, UInt32 sz) {
+void VoodooACPIResourcesParser::parseACPISerialBus(UInt8 const* res, UInt32 offset) {
     if (found_i2c || found_uart)
         return;
     
@@ -84,7 +84,7 @@ void VoodooACPIResourcesParser::parseACPISerialBus(UInt8 const* res, UInt32 offs
     }
 }
 
-void VoodooACPIResourcesParser::parseACPIGPIO(UInt8 const* res, UInt32 offset, UInt32 sz) {
+void VoodooACPIResourcesParser::parseACPIGPIO(UInt8 const* res, UInt32 offset) {
     if (found_gpio_interrupts)
         return;
     
@@ -180,11 +180,11 @@ UInt32 VoodooACPIResourcesParser::parseACPIResources(UInt8 const* res, UInt32 of
     if (opcode == 0x8c) {
         if (found_gpio_interrupts)
             return offset;
-        parseACPIGPIO(res, offset, sz);
+        parseACPIGPIO(res, offset);
     } else if (opcode == 0x8e) {
         if (found_i2c || found_uart)
             return offset;
-        parseACPISerialBus(res, offset, sz);
+        parseACPISerialBus(res, offset);
     }
     
     offset += len + 3;

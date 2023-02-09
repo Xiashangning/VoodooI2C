@@ -17,16 +17,13 @@
 #ifndef VoodooUARTController_hpp
 #define VoodooUARTController_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOWorkLoop.h>
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOTimerEventSource.h>
 #include <IOKit/IOInterruptEventSource.h>
 #include <IOKit/pci/IOPCIDevice.h>
 
-#include "../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
-#include "../utils/helpers.hpp"
-#include "VoodooUARTConstants.h"
+#include "../ACPIParser/VoodooACPIResourcesParser.hpp"
+#include "../helpers.hpp"
 
 #define UART_LONG_IDLE_TIMEOUT  50
 #define UART_IDLE_TIMEOUT       10

@@ -9,17 +9,9 @@
 #ifndef VoodooI2CDeviceNub_hpp
 #define VoodooI2CDeviceNub_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOKitKeys.h>
-#include <IOKit/IOService.h>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "../../../../VoodooGPIO/VoodooGPIO/VoodooGPIO.hpp"
-#include "../../utils/VoodooACPIResourcesParser/VoodooACPIResourcesParser.hpp"
+#include "../../ACPIParser/VoodooACPIResourcesParser.hpp"
 #include "../VoodooI2CController/VoodooI2CController.hpp"
-
-#ifndef EXPORT
-#define EXPORT __attribute__((visibility("default")))
-#endif
 
 #define I2C_DSM_HIDG "3cdff6f7-4267-4555-ad05-b30a3d8938de"
 #define I2C_DSM_TP7G "ef87eb82-f951-46da-84ec-14871ac6f84b"

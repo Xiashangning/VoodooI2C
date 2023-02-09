@@ -9,16 +9,7 @@
 #ifndef VoodooI2CControllerNub_hpp
 #define VoodooI2CControllerNub_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOService.h>
-#include <IOKit/IOKitKeys.h>
-#include <IOKit/IOWorkLoop.h>
-#include <IOKit/IOInterruptEventSource.h>
-#include <IOKit/IOCommandGate.h>
-
-#ifndef EXPORT
-#define EXPORT __attribute__((visibility("default")))
-#endif
+#include "../../helpers.hpp"
 
 class VoodooI2CController;
 

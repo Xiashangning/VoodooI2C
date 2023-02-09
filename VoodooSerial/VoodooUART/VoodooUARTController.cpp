@@ -7,12 +7,7 @@
 //
 
 #include "VoodooUARTController.hpp"
-
-#define AbsoluteTime_to_scalar(x)    (*(uint64_t *)(x))
-
-#define SUB_ABSOLUTETIME(t1, t2)                \
-    (AbsoluteTime_to_scalar(t1) -=                \
-        AbsoluteTime_to_scalar(t2))
+#include "VoodooUARTConstants.h"
 
 #define LOG(str, ...) IOLog("%s::%s " str "\n", "VoodooUARTController", device.name, ##__VA_ARGS__)
 

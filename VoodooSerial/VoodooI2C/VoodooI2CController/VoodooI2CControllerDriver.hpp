@@ -9,15 +9,10 @@
 #ifndef VoodooI2CControllerDriver_hpp
 #define VoodooI2CControllerDriver_hpp
 
-#include <IOKit/IOLib.h>
-#include <IOKit/IOKitKeys.h>
-#include <IOKit/IOService.h>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
-
 #include "VoodooI2CControllerConstants.hpp"
 #include "VoodooI2CControllerNub.hpp"
 #include "../VoodooI2CDevice/VoodooI2CDeviceNub.hpp"
-#include "../../utils/helpers.hpp"
+#include "../../helpers.hpp"
 
 typedef struct _VoodooI2CControllerBusMessage {
     UInt16 address;
