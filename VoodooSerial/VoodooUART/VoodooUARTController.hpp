@@ -25,10 +25,6 @@
 #include "../ACPIParser/VoodooACPIResourcesParser.hpp"
 #include "../helpers.hpp"
 
-#define UART_LONG_IDLE_TIMEOUT  50
-#define UART_IDLE_TIMEOUT       10
-#define UART_ACTIVE_TIMEOUT     1
-
 enum UART_State {
     UART_SLEEP=0,
     UART_LONG_IDLE,
@@ -104,11 +100,8 @@ class EXPORT VoodooUARTController : public IOService {
     IOWorkLoop*             work_loop {nullptr};
     IOCommandGate*          command_gate {nullptr};
     IOCommandGate::Action   transmit_action {nullptr};
-    IOInterruptEventSource *interrupt_source {nullptr};
     IOTimerEventSource*     interrupt_simulator {nullptr};
     AbsoluteTime            last_activate_time {0};
-    bool is_interrupt_enabled {false};
-    bool is_polling {false};
     bool ready {false};
     
     int fifo_size {0};
@@ -142,13 +135,7 @@ class EXPORT VoodooUARTController : public IOService {
     
     void transmitAndReceiveData();
     
-    void handleInterrupt(IOInterruptEventSource *sender, int count);
-    
     void simulateInterrupt(IOTimerEventSource* timer);
-
-    void startInterrupt();
-
-    void stopInterrupt();
     
     void toggleInterruptType(UInt32 type, bool enable);
 };

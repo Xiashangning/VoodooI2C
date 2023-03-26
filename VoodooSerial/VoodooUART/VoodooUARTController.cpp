@@ -9,9 +9,11 @@
 #include "VoodooUARTController.hpp"
 #include "VoodooUARTConstants.h"
 
-#define LOG(str, ...) IOLog("%s::%s " str "\n", "VoodooUARTController", device.name, ##__VA_ARGS__)
-
 #define CONFIGURED(a) a?"YES":"NO"
+
+#define UART_LONG_IDLE_TIMEOUT  50
+#define UART_IDLE_TIMEOUT       10
+#define UART_ACTIVE_TIMEOUT     5
 
 #define super IOService
 OSDefineMetaClassAndStructors(VoodooUARTController, IOService);
@@ -174,20 +176,12 @@ bool VoodooUARTController::start(IOService* provider) {
 //    LOG("    DMA_EXTRA           : %s", CONFIGURED(reg&UART_CPR_DMA_EXTRA));
 //    LOG("    FIFO_SIZE           : %d", fifo_size);
     
-    interrupt_source = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &VoodooUARTController::handleInterrupt), device.pci_device, 0);
-    if (!interrupt_source) {
-        LOG("Too bad that we can only use timer");
-        is_polling = true;
-        interrupt_simulator = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooUARTController::simulateInterrupt));
-        if (!interrupt_simulator) {
-            LOG("No! Even timer cannot be created!");
-            return kIOReturnError;
-        }
-        work_loop->addEventSource(interrupt_simulator);
-    } else {
-        work_loop->addEventSource(interrupt_source);
-        interrupt_source->enable();
+    interrupt_simulator = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooUARTController::simulateInterrupt));
+    if (!interrupt_simulator) {
+        LOG("Could not create timer event!");
+        return kIOReturnError;
     }
+    work_loop->addEventSource(interrupt_simulator);
     
     PMinit();
     device.pci_device->joinPMtree(this);
@@ -240,11 +234,6 @@ void VoodooUARTController::releaseResources() {
         work_loop->removeEventSource(interrupt_simulator);
         OSSafeReleaseNULL(interrupt_simulator);
     }
-    if (interrupt_source) {
-        interrupt_source->disable();
-        work_loop->removeEventSource(interrupt_source);
-        OSSafeReleaseNULL(interrupt_source);
-    }
     if (bus.rx_buffer)
         delete[] bus.rx_buffer;
     unmapMemory();
@@ -270,14 +259,14 @@ IOReturn VoodooUARTController::setPowerState(unsigned long whichState, IOService
 IOReturn VoodooUARTController::setPowerStateGated(unsigned long *whichState) {
     if (*whichState == kIOPMPowerOff) {
         if (device.state != UART_SLEEP) {
-            LOG("Prepare to sleep");
+            DBG_LOG("Prepare to sleep");
             device.state = UART_SLEEP;
             stopCommunication();
             stopUARTClock();
             unmapMemory();
             device.pci_device->enablePCIPowerManagement(kPCIPMCSPowerStateD3);
             device.pci_device->configWrite16(0x80 + 0x4, device.pci_device->configRead16(0x80 + 0x4) | kPCIPMCSPowerStateD3);
-            LOG("Going to sleep");
+            DBG_LOG("Going to sleep");
         }
     } else {
         if (device.state == UART_SLEEP) {
@@ -287,7 +276,7 @@ IOReturn VoodooUARTController::setPowerStateGated(unsigned long *whichState) {
             device.state = UART_IDLE;
             if (target)
                 prepareCommunication();
-            LOG("Woke up");
+            DBG_LOG("Woke up");
         }
     }
     return kIOPMAckImplied;
@@ -367,7 +356,7 @@ IOReturn VoodooUARTController::prepareCommunication() {
         writeRegister(mcr, DW_UART_MCR);
         for (int tries=0; tries < 100; tries++) {   // 10ms in total
             if (readRegister(DW_UART_MSR) & UART_MSR_CTS) {
-                LOG("Received Clear To Send signal!");
+                DBG_LOG("Received Clear To Send signal!");
                 ready = true;
                 break;
             }
@@ -388,7 +377,8 @@ IOReturn VoodooUARTController::prepareCommunication() {
     if (device.device_id == 0x9d27)
         IOSleep(50);
     
-    startInterrupt();
+    interrupt_simulator->enable();
+    interrupt_simulator->setTimeoutMS(UART_IDLE);
     
     return kIOReturnSuccess;
 }
@@ -397,7 +387,9 @@ void VoodooUARTController::stopCommunication() {
     if (!ready)
         return;
     
-    stopInterrupt();
+    interrupt_simulator->cancelTimeout();
+    interrupt_simulator->disable();
+    
     //Clear the interrupt registers.
     writeRegister(0, DW_UART_IER);
     readRegister(DW_UART_LSR);
@@ -449,8 +441,8 @@ IOReturn VoodooUARTController::transmitData(UInt8 *buffer, UInt16 length) {
         
         ret = command_gate->runAction(transmit_action, buffer, &length);
         if (ret == kIOReturnBusy) {
-            LOG("Busy");
-            IOSleep(random()&0x03 + 8);
+            DBG_LOG("Busy");
+            IOSleep(random()&0x03 + UART_ACTIVE_TIMEOUT);
         } else
             break;
     }
@@ -518,12 +510,6 @@ void VoodooUARTController::transmitAndReceiveData() {
     }
 }
 
-// Unused due to failure in registering hardware interrupt.
-void VoodooUARTController::handleInterrupt(IOInterruptEventSource *sender, int count) {
-    LOG("Ohhhhhh");
-    transmitAndReceiveData();
-}
-
 void VoodooUARTController::simulateInterrupt(IOTimerEventSource* timer) {
     if (device.state == UART_SLEEP || !ready)
         return;
@@ -540,7 +526,7 @@ void VoodooUARTController::simulateInterrupt(IOTimerEventSource* timer) {
     SUB_ABSOLUTETIME(&cur_time, &last_activate_time);
     absolutetime_to_nanoseconds(cur_time, &nsecs);
     if (device.state == UART_ACTIVE) {
-        if (nsecs < 100000000) // < 0.1s
+        if (nsecs < 100000000) // < 100ms
             interrupt_simulator->setTimeoutMS(UART_ACTIVE_TIMEOUT);
         else
             device.state=UART_IDLE;
@@ -553,30 +539,4 @@ void VoodooUARTController::simulateInterrupt(IOTimerEventSource* timer) {
             interrupt_simulator->setTimeoutMS(UART_LONG_IDLE_TIMEOUT);
         }
     }
-}
-
-void VoodooUARTController::startInterrupt() {
-    if (is_interrupt_enabled)
-        return;
-    
-    if (is_polling) {
-        interrupt_simulator->enable();
-        interrupt_simulator->setTimeoutMS(UART_IDLE);
-    } else
-        interrupt_source->enable();
-    
-    is_interrupt_enabled = true;
-}
-
-void VoodooUARTController::stopInterrupt() {
-    if (!is_interrupt_enabled)
-        return;
-    
-    if (is_polling) {
-        interrupt_simulator->cancelTimeout();
-        interrupt_simulator->disable();
-    } else
-        interrupt_source->disable();
-    
-    is_interrupt_enabled = false;
 }
